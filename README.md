@@ -52,7 +52,7 @@ This project combines **XGBoost** for risk prediction with **Qwen3-4B LLM** for 
 
 **Run the Web Interface:**
 ```bash
-python -m src.model.ui.gardio
+python -m main
 ```
 Then open `http://localhost:7860` in your browser
 
