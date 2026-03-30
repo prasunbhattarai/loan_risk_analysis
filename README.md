@@ -21,62 +21,9 @@ This project combines **XGBoost** for risk prediction with **Qwen3-4B LLM** for 
 
 *The Gradio-based web interface showing risk score calculation (79.81) with detailed AI-generated explanation*
 
-## Project Structure
-
-```
-loan_risk_analysis/
-├── src/
-│   ├── model/
-│   │   ├── core/                  # Core prediction engine
-│   │   │   ├── load_model.py      # XGBoost model loader & inference
-│   │   │   ├── xgboostmodel.json  # Model architecture
-│   │   │   └── xgboostmodel.pkl   # Trained model weights
-│   │   ├── preprocessing/         # Data preprocessing artifacts
-│   │   │   ├── encoder.pkl        # Label encoders for categorical features
-│   │   │   ├── scaler.pkl         # StandardScaler for numerical features
-│   │   │   ├── features.pkl       # Feature list and ordering
-│   │   │   └── important_features.txt
-│   │   ├── llm/                   # LLM components for explanations
-│   │   │   ├── load_llm.py        # LLM loader & text generation
-│   │   │   ├── SYSTEM_PROMPT.txt  # System prompt for LLM context
-│   │   │   └── corr.json          # Feature correlations with risk
-│   │   ├── analysis/              # Analysis artifacts
-│   │   │   ├── describe.json      # Feature statistics & ranges
-│   │   │   ├── correlations.csv   # Feature correlations
-│   │   │   └── correlation_with_risk_score.json
-│   │   ├── ui/                    # User Interface
-│   │   │   └── gardio.py          # Gradio web interface
-│   │   └── notebooks/             # Jupyter notebooks
-│   │       ├── load.ipynb         # Data loading & exploration
-│   │       └── train.ipynb        # Model training & evaluation
-│   ├── prediction/
-│   │   └── pdf_loader.py          # PDF parsing & data extraction
-│   └── utils/                     # Utility functions
-├── data/
-│   ├── raw/                       # Original datasets
-│   │   ├── Loan.csv              # Main dataset
-│   │   ├── accepted.csv          # Accepted applications
-│   │   └── rejected.csv          # Rejected applications
-│   ├── processed/                # Processed & transformed data
-│   └── predictions/              # Prediction outputs & test data
-├── models/
-│   └── artifacts/                # Pre-trained model artifacts
-├── docs/
-│   ├── notebooks/                # Documentation notebooks
-│   └── notes.txt                 # Technical notes & learnings
-├── cache/                        # HuggingFace model cache
-├── config/                       # Configuration files
-└── README.md
-```
 
 ## Getting Started
 
-### Prerequisites
-
-- Python 3.8+
-- 8GB+ RAM (for LLM inference)
-- GPU recommended (CUDA 11.0+ for faster inference)
-- ~8GB disk space (for model cache)
 
 ### Installation
 
