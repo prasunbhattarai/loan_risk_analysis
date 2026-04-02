@@ -1,10 +1,12 @@
 import json
 import os
+import shap
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from xgboost import XGBRegressor  
-import shap
 
 with open("src/model/analysis/describe.json", "r") as f:
     columns = json.load(f)
@@ -65,6 +67,53 @@ def get_feature_details(top_features, describe_data, original_data):
 
     return enriched
 
+def create_individual_feature_figure(feature_data, index):
+    """Create an individual figure for a single SHAP feature"""
+    fig, ax = plt.subplots(figsize=(4, 3.5))
+    
+    name = feature_data["feature"]
+    value = feature_data["value"]
+    mean = feature_data["mean"]
+    min_val = feature_data["min"]
+    max_val = feature_data["max"]
+    impact = feature_data["impact"]
+    direction = feature_data["direction"]
+    
+    color = "#d73027" if direction == "increase" else "#1a9850"
+    
+    categories = ["Applicant", "Average"]
+    values = [value, mean]
+    
+    bars = ax.bar(categories, values, color=[color, "#cccccc"], alpha=0.8, edgecolor="black", linewidth=1.5)
+    
+    # Add value labels on bars
+    for bar, val in zip(bars, values):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height,
+                f'{val:.2f}',
+                ha='center', va='bottom', fontweight='bold', fontsize=10)
+    
+    title = f"{name}\nFeature Impact: {impact:.3f} ({direction})"
+    ax.set_title(title, fontweight='bold', fontsize=11, pad=10)
+    
+    ax.axhline(y=min_val, color='lightgray', linestyle='--', alpha=0.5, linewidth=1)
+    ax.axhline(y=max_val, color='lightgray', linestyle='--', alpha=0.5, linewidth=1)
+    
+    ax.set_ylabel("Value", fontweight='bold')
+    ax.set_ylim(min(0, min_val - 0.1 * (max_val - min_val)), 
+                max_val + 0.1 * (max_val - min_val))
+    
+    plt.tight_layout()
+    return fig
+
+
+def visualization(enriched_features):
+    """Create individual figures for each SHAP feature"""
+    figures = []
+    for idx, feature in enumerate(enriched_features):
+        fig = create_individual_feature_figure(feature, idx)
+        figures.append(fig)
+    return figures
 
 def format_features_for_llm(features):
     text = ""
@@ -130,7 +179,9 @@ def predict(data):
     )
     # print(enriched_features)
     text_for_llm = format_features_for_llm(enriched_features)
+    fig = visualization(enriched_features)
+
     # print(text_for_llm)
-    return prediction[0], text_for_llm
+    return prediction[0], text_for_llm,fig
 
 # predict("prediction_data.csv")
