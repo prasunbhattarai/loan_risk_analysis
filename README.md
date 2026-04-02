@@ -12,8 +12,10 @@ This project combines **XGBoost** for risk prediction with **Qwen3-4B LLM** for 
 - **SHAP Explainability**: Feature importance and impact direction analysis
 - **LLM Explanations**: Qwen3-4B generates context-aware risk explanations
 - **PDF Processing**: Extracts applicant data from loan application PDFs
+- **SHAP Visualizations**: Individual plots for the top 5 features showing applicant values vs. typical ranges and their impact on risk
 - **Web UI**: Interactive Gradio interface for real-time predictions
 - **Production Ready**: Modular architecture with clear separation of concerns
+
 
 ## Web Interface
 
@@ -78,6 +80,7 @@ print(f"Explanation: {explanation}")
 ### 2. **Risk Prediction**
    - XGBoost model predicts continuous risk scores (0-100)
    - SHAP explains top 5 features driving the prediction
+   - **Visualizations**: Each top feature is displayed in a bar plot comparing the applicant’s value to the average, highlighting whether it increases or decreases risk
    - Direction of impact identified (increases/decreases risk)
 
 ### 3. **Explanation Generation**
@@ -207,9 +210,6 @@ MODEL_NAME = "Qwen/Qwen2.5-1.5B"
 - Subsequent predictions are fast (~5-10 seconds)
 - GPU recommended for faster inference
 
-### PDF Processing Issues
-- Ensure PDF has tabular data
-- Check `src/prediction/pdf_loader.py` for supported formats
 
 ## Development
 
