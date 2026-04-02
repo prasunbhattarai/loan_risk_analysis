@@ -4,27 +4,31 @@ from src.model.llm.load_llm import generate_text
 from src.file_loader.pdf_loader import compute_features, prediction_data
 from src.model.core.load_model import predict
 import shutil
-import os
+
 
 def process_pdf(file):
     save_path = "loan.pdf"
+    if file is None:
+         return "", "Please upload a PDF file.", *[None]*5
     shutil.copy(file.name, save_path)
+
     try:
         data = prediction_data(save_path)
+
         if all(values is None for values in data.values()):
-            return f"Please upload a valid PDF file.", f"Could not extract any meaningful data from PDF."
+            return "Invalid PDF", "Could not extract meaningful data.", *[None]*5
 
         df = compute_features(data)
 
         if df.isnull().mean().mean() > 0.5:
-            return f"Please upload a valid PDF file.", f"Too many missing values in extracted data. Could not process PDF."
+            return "Invalid PDF", "Too many missing values.", *[None]*5
 
-        prediction, predict_data = predict(df)
+        prediction, predict_data, figs = predict(df)
 
     except Exception as e:
-        return f"Please upload a valid PDF file.", f"The file could not be processed." 
+        return "Invalid PDF", f"Processing failed: {e}", *[None]*5
 
-
+    # Load prompts
     with open("src/model/llm/SYSTEM_PROMPT.txt", "r") as f:
         SYSTEM_PROMPT = f.read().strip()
 
@@ -46,17 +50,61 @@ def process_pdf(file):
 
     explanation = generate_text(user_input, SYSTEM_PROMPT)
 
-    return f"{prediction:.2f}", explanation
+    while len(figs) < 5:
+        figs.append(None)
+
+    return f"{prediction:.2f}", explanation, *figs[:5]
+
+def reset_outputs(file):
+    if file is None:
+        return "", "Please upload a PDF file.", *[None]*5
+    return "", "File uploaded. Click 'Analyze' to process.", *[None]*5
+
+# UI
+with gr.Blocks(title="Loan Risk Analyzer") as app:
+    gr.Markdown("# 🏦 Loan Risk Analyzer")
+    gr.Markdown("Upload a loan application PDF to get prediction and SHAP analysis.")
+
+    with gr.Row():
+        pdf_input = gr.File(label="📤 Upload Loan PDF", type="filepath")
+        submit_btn = gr.Button("Analyze", variant="primary")
+
+    gr.Markdown("---")
+
+    with gr.Row():
+        risk_score = gr.Textbox(label="📊 Risk Score", interactive=False)
+        explanation = gr.Textbox(label="💬 Explanation", lines=6, interactive=False)
+
+    gr.Markdown("---")
+    gr.Markdown("## 🔍 Top SHAP Feature Analysis")
+
+    # ✅ CORRECT ROW-WISE LAYOUT (NO render())
+    figs = []
+
+    for i in range(0, 5, 3):  # 3 per row
+        with gr.Row():
+            for j in range(i, min(i+3, 5)):
+                fig = gr.Plot(label=f"Feature {j+1}")
+                figs.append(fig)
+
+    submit_btn.click(
+        fn=process_pdf,
+        inputs=pdf_input,
+        outputs=[risk_score, explanation, *figs]
+    )
+
+    pdf_input.change(
+        fn=reset_outputs,
+        inputs=pdf_input,
+        outputs=[risk_score, explanation, *figs]
+    )
 
 
-app = gr.Interface(
-    fn=process_pdf,
-    inputs=gr.File(label="Upload Loan PDF"),
-    outputs=[
-        gr.Textbox(label="Risk Score"),
-        gr.Textbox(label="Explanation")
-    ],
-    title="Loan Risk Analyzer",
-    description="Upload a loan application PDF to get prediction + explanation"
-)
-
+app.launch(css=""".gradio-container {
+        max-width: 1400px !important;
+        margin: auto;
+    }
+    .gr-row {
+        flex-wrap: nowrap !important;
+    }
+    """)
