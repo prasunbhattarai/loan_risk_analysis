@@ -4,7 +4,6 @@ import torch
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 from src.model.core.load_model import predict
-from src.file_loader.pdf_loader import  prediction_dataframe
 
 
 MODEL_NAME = "Qwen/Qwen3-4B"
