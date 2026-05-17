@@ -20,7 +20,7 @@ def process_pdf(file):
 
         df = compute_features(data)
 
-        if df.isnull().mean().mean() > 0.5:
+        if df.isnull().mean().mean() > 0.8:
             return "Invalid PDF", "Too many missing values.", *[None]*5
 
         prediction, predict_data, figs = predict(df)

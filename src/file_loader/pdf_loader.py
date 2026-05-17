@@ -26,7 +26,7 @@ def extract_text(pattern, text):
 def normalize_percentage(value):
     if value is None:
         return None
-    return value / 100 
+    return value * 100 
 def normalize_binary(value):
     if value is None:
         return None

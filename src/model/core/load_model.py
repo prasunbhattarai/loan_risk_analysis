@@ -34,7 +34,7 @@ def shap_explainer(model, X, features):
 
     shap_df["abs_impact"] = shap_df["impact"].abs()
 
-    top_features = shap_df.sort_values("abs_impact", ascending=False).head(5)
+    top_features = shap_df.sort_values("abs_impact", ascending=True).head(5)
     top_features["direction"] = top_features["impact"].apply(
         lambda x: "increase" if x > 0 else "decrease"
     )
@@ -125,7 +125,7 @@ def format_features_for_llm(features):
         is_binary = f["max"] == 1.0 and f["min"] == 0.0
 
         if is_binary:
-            if value == 1:
+            if value == 0:
                 description = "This condition is present"
             else:
                 description = "This condition is not present"
@@ -139,7 +139,7 @@ def format_features_for_llm(features):
             """
 
         else:
-            deviation = "higher" if value > mean else "lower"
+            deviation = "higher" if value < mean else "lower"
 
             text += f"""
 Feature: {f['feature']}
